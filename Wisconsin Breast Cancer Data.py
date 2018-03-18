@@ -66,11 +66,8 @@ def create_model(X_train, y_train, X_val, y_val):
 
     from keras import callbacks
 
-    callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=0, mode='auto',
-                                      epsilon=0.0001, cooldown=0, min_lr=0)
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                  patience=5, min_lr=0.001)
-    model.fit(X_train, Y_train, callbacks=[reduce_lr])
+    reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+                                            patience=5, min_lr=0.001)
 
     model.compile(optimizer={{choice(['rmsprop', 'adam', 'sgd'])}},
                   loss='binary_crossentropy',
@@ -80,7 +77,8 @@ def create_model(X_train, y_train, X_val, y_val):
               y_train,
               epochs={{choice([25, 50, 75, 100])}},
               batch_size={{choice([16, 32, 64])}},
-              validation_data=(X_val, y_val))
+              validation_data=(X_val, y_val),
+              callbacks=[reduce_lr])
 
     score, acc = model.evaluate(X_val, y_val, verbose=0)
     print('Test accuracy:', acc)
@@ -88,6 +86,7 @@ def create_model(X_train, y_train, X_val, y_val):
 
 
 if __name__ == '__main__':
+
     best_run, best_model = optim.minimize(model=create_model,
                                           data=data,
                                           algo=tpe.suggest,
