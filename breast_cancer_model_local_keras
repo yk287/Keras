@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Mon Feb 12 20:46:05 2018
@@ -55,22 +56,19 @@ def create_model(X_train, y_train, X_val, y_val):
 
     model = models.Sequential()
     model.add(
-        layers.Dense({{choice([np.power(2, 5), np.power(2, 6), np.power(2, 7)])}}, input_shape=(len(data.columns),)))
+    layers.Dense({{choice([np.power(2, 5), np.power(2, 6), np.power(2, 7)])}}, input_shape=(len(data.columns),)))
     model.add(LeakyReLU(alpha={{uniform(0.5, 1)}}))
     model.add(Dropout({{uniform(0.5, 1)}}))
     model.add(layers.Dense({{choice([np.power(2, 3), np.power(2, 4), np.power(2, 5)])}}))
-    # model.add(Activation({{choice([ 'tanh'])}}))
     model.add(LeakyReLU(alpha={{uniform(0.5, 1)}}))
     model.add(Dropout({{uniform(0.5, 1)}}))
     model.add(layers.Dense(1, activation='sigmoid'))
 
     from keras import callbacks
-
-    keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=0, mode='auto',
-                                      epsilon=0.0001, cooldown=0, min_lr=0)
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+        
+    reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                                   patience=5, min_lr=0.001)
-    model.fit(X_train, Y_train, callbacks=[reduce_lr])
+
 
     model.compile(optimizer={{choice(['rmsprop', 'adam', 'sgd'])}},
                   loss='binary_crossentropy',
@@ -80,7 +78,8 @@ def create_model(X_train, y_train, X_val, y_val):
               y_train,
               epochs={{choice([25, 50, 75, 100])}},
               batch_size={{choice([16, 32, 64])}},
-              validation_data=(X_val, y_val))
+              validation_data=(X_val, y_val),
+              callbacks=[reduce_lr])
 
     score, acc = model.evaluate(X_val, y_val, verbose=0)
     print('Test accuracy:', acc)
@@ -88,6 +87,7 @@ def create_model(X_train, y_train, X_val, y_val):
 
 
 if __name__ == '__main__':
+    '''
     best_run, best_model = optim.minimize(model=create_model,
                                           data=data,
                                           algo=tpe.suggest,
