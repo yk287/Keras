@@ -66,7 +66,7 @@ def create_model(X_train, y_train, X_val, y_val):
 
     from keras import callbacks
 
-    keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=0, mode='auto',
+    callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=0, mode='auto',
                                       epsilon=0.0001, cooldown=0, min_lr=0)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                                   patience=5, min_lr=0.001)
